@@ -3,51 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROBLOX GIVEAWAY</title>
-    <!-- 基礎庫 -->
+    <title>HacqR 10萬訂閱抽獎</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Firebase SDK (使用穩定相容版) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #050508; 
-            color: #e2e8f0; 
-            margin: 0;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #050508; color: #e2e8f0; margin: 0; overflow-x: hidden; }
         .font-tech { font-family: 'Orbitron', sans-serif; }
-        .glass-panel {
-            background: rgba(15, 15, 25, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
+        
+        .yellow-glow-text {
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.4);
         }
-        .box-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .box-card.active {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-        }
+
+        .glass-panel { background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
+        
+        .box-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; cursor: pointer; }
+        .box-card.active { border-color: #fbbf24; background: rgba(251, 191, 36, 0.2); box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); transform: translateY(-2px); }
+        .box-text { font-size: 1.125rem; font-weight: 900; letter-spacing: 0.05em; }
+
         .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        input[type="password"] { -webkit-text-security: disc; }
-        .gradient-text {
-            background: linear-gradient(90deg, #fff, #64748b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
+        
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .winner-item { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .yellow-box-glow {
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            border: 1px solid rgba(251, 191, 36, 0.5);
         }
     </style>
 </head>
@@ -55,7 +47,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Firebase 配置
         const firebaseConfig = {
             apiKey: "AIzaSyAdK4WJIc2aK2YUdybq9_xBiDPFSghM76Y",
             authDomain: "hacqr-lottery.firebaseapp.com",
@@ -69,15 +60,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        const appId = "roblox-draw-secure";
+        const appId = "roblox-draw-secure"; 
 
         const { useState, useEffect } = React;
-
-        const BoxIcon = () => (
-            <svg className="w-8 h-8 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M21 8.25L12 13L3 8.25M21 8.25L12 3.5L3 8.25M21 8.25V15.75L12 20.5L3 15.75V8.25" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-        );
 
         function App() {
             const [user, setUser] = useState(null);
@@ -87,22 +72,26 @@
             const [memberId, setMemberId] = useState('');
             const [selectedBox, setSelectedBox] = useState('皮膚箱 2');
             const [adminPassword, setAdminPassword] = useState('');
-            const [drawCount, setDrawCount] = useState(1);
             const [winners, setWinners] = useState([]);
+            const [drawCount, setDrawCount] = useState(1);
             const [message, setMessage] = useState({ type: '', text: '' });
             const [loading, setLoading] = useState(false);
+            const [showConfirm, setShowConfirm] = useState(false);
 
             useEffect(() => {
-                auth.signInAnonymously().catch(console.error);
-                return auth.onAuthStateChanged(u => setUser(u));
+                auth.signInAnonymously().then(cred => setUser(cred.user)).catch(() => {
+                    showStatus('error', '連線伺服器失敗');
+                });
             }, []);
 
             useEffect(() => {
                 if (!user) return;
                 const path = `artifacts/${appId}/public/data/participants`;
-                return db.collection(path).onSnapshot(snap => {
-                    setParticipants(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                });
+                const unsubscribe = db.collection(path).onSnapshot(
+                    snap => setParticipants(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+                    err => showStatus('error', '權限錯誤')
+                );
+                return () => unsubscribe();
             }, [user]);
 
             const showStatus = (type, text) => {
@@ -110,182 +99,225 @@
                 setTimeout(() => setMessage({ type: '', text: '' }), 4000);
             };
 
-            const verifyKey = async (input, type) => {
-                if (!input.trim() || !user) return false;
-                try {
-                    const keyPath = `artifacts/${appId}/public/data/vault/${type}/keys/${input.trim()}`;
-                    const doc = await db.doc(keyPath).get();
-                    return doc.exists;
-                } catch (e) { return false; }
-            };
-
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                if (!user || !robloxId.trim() || loading) return;
+                if (!user || loading) return;
+                
+                const targetId = robloxId.trim();
+                if (!targetId) return showStatus('error', '請輸入正確帳號');
+
+                // 檢查是否重複參加 (限制一人一次)
+                const isAlreadyJoined = participants.some(p => p.robloxId.toLowerCase() === targetId.toLowerCase());
+                if (isAlreadyJoined) {
+                    return showStatus('error', '您已經參加過囉！每人限參加一次');
+                }
+                
                 setLoading(true);
                 try {
-                    let isVip = false;
+                    const path = `artifacts/${appId}/public/data/participants`;
                     if (memberId.trim()) {
-                        if (await verifyKey(memberId, 'vip')) isVip = true;
-                        else throw new Error("會員驗證失敗，請檢查 ID");
-                    }
-                    if (participants.some(p => p.robloxId?.toLowerCase() === robloxId.trim().toLowerCase())) throw new Error("此帳號已經報名過囉！");
-
-                    const colPath = `artifacts/${appId}/public/data/participants`;
-                    if (isVip) {
-                        const batch = db.batch();
-                        for (let i = 0; i < 20; i++) {
-                            const ref = db.collection(colPath).doc();
-                            batch.set(ref, { robloxId: robloxId.trim(), box: selectedBox, s: true, t: Date.now() });
+                        const vipDoc = await db.doc(`artifacts/${appId}/public/data/vault/vip/keys/${memberId.trim()}`).get();
+                        if (vipDoc.exists) {
+                            const batch = db.batch();
+                            // VIP 寫入 20 次以增加權重，但邏輯上仍視為單次參加
+                            for (let i = 0; i < 20; i++) {
+                                batch.set(db.collection(path).doc(), { robloxId: targetId, box: selectedBox, s: true, t: Date.now() });
+                            }
+                            await batch.commit();
+                            showStatus('success', 'VIP 認證成功 (已獲得 20 倍機率)');
+                        } else {
+                            throw new Error("VIP 代碼錯誤");
                         }
-                        await batch.commit();
-                        showStatus('success', 'VIP 權限啟動：20倍中獎機率已注入');
                     } else {
-                        await db.collection(colPath).add({ robloxId: robloxId.trim(), box: selectedBox, s: false, t: Date.now() });
-                        showStatus('success', '提交成功，祝您幸運中獎！');
+                        await db.collection(path).add({ robloxId: targetId, box: selectedBox, s: false, t: Date.now() });
+                        showStatus('success', '報名成功！感謝參加 10 萬訂閱慶祝活動');
                     }
                     setRobloxId(''); setMemberId('');
-                } catch (err) { showStatus('error', err.message); }
-                finally { setLoading(false); }
+                } catch (err) {
+                    showStatus('error', err.message);
+                } finally {
+                    setLoading(false);
+                }
             };
 
-            const handleAdminLogin = async () => {
-                if (await verifyKey(adminPassword, 'admin')) {
-                    setIsAdmin(true); setAdminPassword(''); showStatus('success', '管理控制台已開啟');
-                } else { showStatus('error', '安全碼錯誤'); }
+            const executeClear = async () => {
+                setShowConfirm(false);
+                setLoading(true);
+                try {
+                    const collectionRef = db.collection(`artifacts/${appId}/public/data/participants`);
+                    const snap = await collectionRef.get();
+                    const batch = db.batch();
+                    snap.docs.forEach(doc => batch.delete(doc.ref));
+                    await batch.commit();
+                    setWinners([]);
+                    showStatus('success', '名單已成功清空');
+                } catch (err) {
+                    showStatus('error', '清空失敗');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleDraw = () => {
+                if (participants.length === 0) return showStatus('error', '名單為空');
+                const selected = [];
+                for (let i = 0; i < drawCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * participants.length);
+                    selected.push(participants[randomIndex]);
+                }
+                setWinners(selected);
+                showStatus('success', `抽選成功！`);
             };
 
             return (
-                <div className="min-h-screen p-6 md:p-12 max-w-7xl mx-auto flex flex-col">
-                    <header className="flex justify-between items-center mb-16">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-                                <svg className="text-white w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="M8 21h8m-4-4v4M5 3h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-black font-tech italic tracking-tight text-white leading-none">ROBLOX GIVEAWAY</h1>
-                                <p className="text-[9px] font-bold text-blue-500 tracking-[0.4em] uppercase opacity-70 mt-1">Cloud Database Synchronized</p>
+                <div className="min-h-screen p-4 md:p-12 flex flex-col items-center">
+                    {showConfirm && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
+                            <div className="glass-panel p-8 max-w-sm w-full text-center border-rose-500/30">
+                                <h3 className="text-xl font-black text-white mb-2">確定重置名單？</h3>
+                                <p className="text-slate-400 text-sm mb-6">這將會清除所有參賽者的報名資料。</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setShowConfirm(false)} className="flex-1 py-3 rounded-xl bg-white/5 text-slate-400 font-bold">取消</button>
+                                    <button onClick={executeClear} className="flex-1 py-3 rounded-xl bg-rose-600 text-white font-bold">確認刪除</button>
+                                </div>
                             </div>
                         </div>
-                        <button onClick={() => isAdmin && setIsAdmin(false)} className="px-6 py-2 rounded-xl border border-white/5 bg-white/5 text-[10px] font-black tracking-widest text-slate-500 hover:text-white transition-all uppercase">
-                            {isAdmin ? 'Exit Terminal' : 'Admin Portal'}
+                    )}
+
+                    <header className="w-full max-w-6xl flex justify-between items-center mb-10">
+                        <div className="flex items-center gap-5">
+                            <div className="w-12 h-12 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.6)]">
+                                <span className="text-black font-black text-xl italic font-tech">R</span>
+                            </div>
+                            <div className="hidden sm:block">
+                                <h1 className="text-2xl font-black font-tech italic leading-none tracking-tight yellow-glow-text">HacqR 10萬訂閱抽獎</h1>
+                                <p className="text-[10px] text-yellow-600 font-bold tracking-[0.2em] mt-1 uppercase">Celebration Special Edition</p>
+                            </div>
+                        </div>
+                        <button onClick={() => isAdmin && setIsAdmin(false)} className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black tracking-widest text-slate-500 hover:text-yellow-500 transition-all uppercase">
+                            {isAdmin ? '退出控制台' : '管理員登入'}
                         </button>
                     </header>
 
                     {message.text && (
-                        <div className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-10 py-5 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/10 animate-in fade-in slide-in-from-top-10 ${message.type === 'success' ? 'bg-blue-600/90' : 'bg-rose-600/90'} text-white font-bold flex items-center gap-3`}>
-                            <span className="text-xl">{message.type === 'success' ? '✓' : '✕'}</span>
+                        <div className={`fixed top-10 z-[100] px-8 py-4 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/10 animate-in fade-in slide-in-from-top-5 ${message.type === 'success' ? 'bg-yellow-600/95 text-black' : 'bg-rose-600/95 text-white'} font-bold`}>
                             {message.text}
                         </div>
                     )}
 
-                    <main className="flex-1">
+                    <main className="w-full max-w-6xl">
                         {!isAdmin ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                                <div className="lg:col-span-7 glass-panel p-10 md:p-14 shadow-2xl">
-                                    <h2 className="text-4xl font-black italic text-white mb-12 tracking-tight">參加抽獎活動</h2>
-                                    <form onSubmit={handleSubmit} className="space-y-10">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div className="space-y-3">
-                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Roblox Username</label>
-                                                <input type="text" value={robloxId} onChange={e => setRobloxId(e.target.value)} placeholder="您的帳號名稱" className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white outline-none focus:border-blue-600 font-bold transition-all" required />
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-7 glass-panel p-8 md:p-12 shadow-2xl">
+                                    <h2 className="text-3xl font-black italic text-white mb-10 flex items-center gap-4 uppercase tracking-tighter">
+                                        <span className="w-1.5 h-8 bg-yellow-500 rounded-full"></span>
+                                        參與抽獎
+                                    </h2>
+                                    <form onSubmit={handleSubmit} className="space-y-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">ROBLOX ID</label>
+                                                <input type="text" value={robloxId} onChange={e => setRobloxId(e.target.value)} placeholder="您的帳號" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500 font-bold text-lg" required />
                                             </div>
-                                            <div className="space-y-3">
-                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Member ID (Optional)</label>
-                                                <input type="text" value={memberId} onChange={e => setMemberId(e.target.value)} placeholder="VIP 驗證碼" className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white outline-none focus:border-blue-600 font-bold transition-all" />
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">VIP 驗證碼</label>
+                                                <input type="text" value={memberId} onChange={e => setMemberId(e.target.value)} placeholder="選填加權用" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500 font-bold text-lg" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-center block">請選擇欲抽取的箱子</label>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                {['皮膚箱 1', '皮膚箱 2', '皮膚箱 3'].map(box => (
+                                                    <div key={box} onClick={() => setSelectedBox(box)} className={`box-card py-7 rounded-2xl flex flex-col items-center justify-center ${selectedBox === box ? 'active' : 'opacity-40 hover:opacity-100'}`}>
+                                                        <span className="box-text text-white">{box}</span>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-3 gap-4">
-                                            {['皮膚箱 1', '皮膚箱 2', '皮膚箱 3'].map(box => (
-                                                <button key={box} type="button" onClick={() => setSelectedBox(box)} className={`box-card p-6 rounded-3xl flex flex-col items-center justify-center transition-all ${selectedBox === box ? 'active' : 'opacity-40 hover:opacity-100'}`}>
-                                                    <BoxIcon />
-                                                    <span className="text-[10px] font-bold uppercase tracking-widest mt-2">{box}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        <button disabled={loading} className="w-full bg-blue-600 hover:bg-blue-500 py-8 rounded-[2rem] font-black text-white text-xl shadow-2xl shadow-blue-900/30 active:scale-95 transition-all flex justify-center items-center gap-4">
-                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                            {loading ? '正在同步加密...' : '立即提交名單'}
+                                        <button disabled={loading} className="w-full bg-yellow-500 hover:bg-yellow-400 py-6 rounded-2xl font-black text-black text-xl transition-all active:scale-[0.98] shadow-lg shadow-yellow-900/20">
+                                            {loading ? '傳送資料中...' : '提交報名資訊'}
                                         </button>
+                                        <p className="text-center text-[10px] text-slate-600 font-bold uppercase tracking-widest italic">※ 注意：每個帳號僅限參加一次</p>
                                     </form>
                                 </div>
-
-                                <div className="lg:col-span-5 flex flex-col gap-8">
-                                    <div className="glass-panel p-12 flex-1 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                                            <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                
+                                <div className="lg:col-span-5 flex flex-col gap-6">
+                                    <div className="glass-panel p-10 flex-1 flex flex-col items-center justify-center text-center">
+                                        <div className="text-xs font-black text-yellow-600/60 uppercase tracking-[0.5em] mb-4">目前的報名總數</div>
+                                        <div className="text-9xl font-black text-white font-tech mb-4 tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                                            {/* 如果有 VIP 寫入多次，這裡簡單計算不重複的人數 */}
+                                            {[...new Set(participants.map(p => p.robloxId))].length}
                                         </div>
-                                        <div className="text-[10px] font-black text-blue-500 uppercase tracking-[0.5em] mb-4">Secret Clearance</div>
-                                        <div className="bg-white/5 p-8 rounded-full mb-6">
-                                            <div className="text-5xl font-black text-white font-tech">{participants.length}</div>
-                                        </div>
-                                        <p className="text-slate-400 font-bold">目前已收到名單總數</p>
+                                        <div className="h-1.5 w-16 bg-yellow-500 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.5)]"></div>
+                                        <p className="mt-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">(不重複名單計數)</p>
                                     </div>
-
-                                    <div className="glass-panel p-8 bg-gradient-to-br from-white/[0.03] to-transparent border-white/10">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Restricted Area</span>
-                                        </div>
-                                        <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="管理密鑰" className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-center text-white outline-none focus:border-blue-600 text-sm tracking-[0.6em] mb-4" />
-                                        <button onClick={handleAdminLogin} className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black text-slate-400 hover:text-white uppercase tracking-widest transition-all">驗證存取</button>
+                                    
+                                    <div className="glass-panel p-6">
+                                        <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="管理員安全碼" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-white outline-none text-xs tracking-[0.5em] mb-3" />
+                                        <button onClick={async () => {
+                                            const snap = await db.doc(`artifacts/${appId}/public/data/vault/admin/keys/${adminPassword.trim()}`).get();
+                                            if (snap.exists) { setIsAdmin(true); setAdminPassword(''); } else { showStatus('error', '安全碼不正確'); }
+                                        }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-yellow-500 transition-colors">開發者控制台入口</button>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-8 animate-in fade-in zoom-in-95">
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                                    <div className="lg:col-span-2 glass-panel h-[700px] flex flex-col overflow-hidden shadow-2xl border-white/10">
-                                        <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/5">
-                                            <h3 className="font-black text-white italic tracking-widest uppercase">實時名單庫</h3>
-                                            <span className="px-4 py-1 bg-blue-600 rounded-full text-[10px] font-black text-white">{participants.length}</span>
+                            <div className="glass-panel p-6 md:p-10 min-h-[700px] flex flex-col animate-in slide-in-from-bottom-5">
+                                <div className="flex flex-wrap justify-between items-center mb-10 border-b border-white/5 pb-8 gap-4">
+                                    <div>
+                                        <h3 className="text-2xl font-black italic uppercase text-white tracking-tighter">抽獎控制終端</h3>
+                                        <p className="text-[9px] text-yellow-600 font-bold tracking-widest uppercase italic">Subscribers Celebration Mode</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center bg-black/80 rounded-xl border border-white/10 p-2 px-4 gap-4">
+                                            <span className="text-[10px] font-black text-slate-600 uppercase">抽取人數</span>
+                                            <input type="number" value={drawCount} onChange={e => setDrawCount(Math.max(1, parseInt(e.target.value) || 1))} className="bg-transparent w-12 text-center text-xl font-tech text-yellow-500 outline-none" />
                                         </div>
-                                        <div className="flex-1 overflow-y-auto p-8 space-y-4 custom-scroll">
-                                            {participants.map(p => (
-                                                <div key={p.id} className="bg-white/5 p-6 rounded-3xl flex justify-between items-center border border-white/5 hover:border-blue-500/50 transition-all">
-                                                    <div className="flex items-center gap-6">
-                                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${p.s ? 'bg-yellow-500/20 text-yellow-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                                                            {p.s ? '★' : '👤'}
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-white font-black text-xl tracking-tight">{p.robloxId}</div>
-                                                            <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">{p.box} • {p.s ? 'Premium' : 'Standard'}</div>
-                                                        </div>
-                                                    </div>
-                                                    <button onClick={() => db.collection(`artifacts/${appId}/public/data/participants`).doc(p.id).delete()} className="text-slate-700 hover:text-rose-500 font-black text-xs p-2">移除</button>
+                                        <button onClick={handleDraw} className="bg-yellow-500 px-8 py-3.5 rounded-xl font-black text-black hover:bg-yellow-400 shadow-xl text-sm transition-all">執行抽選</button>
+                                        <button onClick={() => setShowConfirm(true)} className="bg-rose-900/30 text-rose-500 border border-rose-500/20 px-6 py-3.5 rounded-xl font-black text-[10px] uppercase hover:bg-rose-600 transition-all">清空報名名單</button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 overflow-hidden">
+                                    <div className="lg:col-span-4 flex flex-col h-[500px] lg:h-auto overflow-hidden bg-black/40 rounded-3xl border border-white/5">
+                                        <div className="p-4 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 bg-white/5">參賽名單總覽 ({participants.length})</div>
+                                        <div className="flex-1 overflow-y-auto p-2 custom-scroll">
+                                            {participants.map((p, idx) => (
+                                                <div key={idx} className="flex justify-between items-center p-3 mb-1 hover:bg-white/5 rounded-xl transition-all">
+                                                    <span className="font-bold text-white text-sm">{p.robloxId}</span>
+                                                    {p.s && <span className="text-[8px] bg-yellow-500/10 text-yellow-500 px-1.5 py-0.5 rounded font-black tracking-tighter border border-yellow-500/20 uppercase">VIP X20</span>}
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="glass-panel p-10 flex flex-col gap-10">
-                                        <div className="space-y-6">
-                                            <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] text-center">抽獎系統設定</h3>
-                                            <div className="bg-black/60 p-10 rounded-[2.5rem] border border-white/5">
-                                                <input type="number" value={drawCount} onChange={e => setDrawCount(parseInt(e.target.value) || 1)} className="w-full bg-transparent text-center text-white font-tech text-7xl outline-none" />
-                                                <div className="text-center text-slate-600 text-[9px] font-bold uppercase mt-4 tracking-widest">Winners Count</div>
-                                            </div>
-                                        </div>
-                                        <button onClick={() => setWinners([...participants].sort(() => 0.5 - Math.random()).slice(0, Math.min(drawCount, participants.length)))} className="w-full bg-emerald-600 py-8 rounded-[2rem] font-black text-white uppercase tracking-[0.3em] shadow-[0_0_30px_rgba(16,185,129,0.3)] active:scale-95 transition-all text-xl">開始抽取名單</button>
-                                        <div className="space-y-4">
-                                            {winners.map((w, i) => (
-                                                <div key={i} className="bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/20 flex justify-between items-center animate-in slide-in-from-right-10" style={{animationDelay: `${i*100}ms`}}>
-                                                    <span className="text-emerald-400 font-black italic">{w.robloxId}</span>
-                                                    <span className="text-[9px] text-emerald-600 font-black uppercase border border-emerald-600/30 px-2 py-1 rounded-lg">Win</span>
+
+                                    <div className="lg:col-span-8 flex flex-col h-full bg-yellow-500/5 rounded-3xl border border-yellow-500/10 overflow-hidden">
+                                        <div className="p-4 px-6 text-[10px] font-black text-yellow-500 uppercase tracking-widest border-b border-yellow-500/10 bg-yellow-500/10 text-center">得獎名單輸出</div>
+                                        <div className="flex-1 overflow-y-auto p-6 custom-scroll grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start content-start">
+                                            {winners.length > 0 ? (
+                                                winners.map((w, i) => (
+                                                    <div key={i} className="winner-item bg-white/5 border border-yellow-500/30 p-4 rounded-2xl flex items-center gap-4 yellow-box-glow">
+                                                        <div className="w-7 h-7 shrink-0 rounded-full bg-yellow-500 flex items-center justify-center font-tech font-bold text-black text-[10px]">{i+1}</div>
+                                                        <div className="min-w-0">
+                                                            <div className="text-sm font-black text-white italic truncate uppercase">{w.robloxId}</div>
+                                                            <div className="text-[8px] text-yellow-600 font-bold uppercase tracking-tighter">{w.box}</div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="col-span-full h-full flex flex-col items-center justify-center opacity-10 py-20">
+                                                    <p className="font-black tracking-[0.4em] uppercase text-xs">等待抽選啟動</p>
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
                     </main>
-                    <footer className="py-12 text-center">
-                        <p className="text-[10px] font-black text-slate-800 tracking-[1em] uppercase">Hacqr Lottery Management v2.5.0</p>
-                    </footer>
+                    <footer className="py-12 opacity-5 text-[9px] font-black uppercase tracking-[1.5em] text-center italic">HacqR 100K Subscribers Celebration Edition</footer>
                 </div>
             );
         }
