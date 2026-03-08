@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacqr RIVALS 皮膚箱抽獎</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f0c1d; /* 深紫色背景 */
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.8), 0 0 20px rgba(255, 193, 7, 0.5);
+        }
+        .form-container {
+            background-color: #1e1b33;
+            border: 1px solid #3d3a54;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-lg text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-yellow-400 glow-text mb-2">
+            Hacqr RIVALS 皮膚箱抽獎
+        </h1>
+        <p class="text-yellow-500 text-lg mb-8">
+            7萬訂閱特別篇 - 送30個皮膚箱！
+        </p>
+
+        <div class="form-container p-8 rounded-2xl shadow-2xl text-left">
+            <form id="lotteryForm">
+                <div class="mb-6">
+                    <label class="block text-gray-300 text-lg mb-2">你的 Roblox ID / Username</label>
+                    <input type="text" id="robloxId" required
+                        class="w-full bg-[#16132b] border border-gray-600 rounded-lg p-4 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-colors"
+                        placeholder="例如：hAcKe_520">
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-gray-300 text-lg mb-2">你要抽哪個皮膚箱？</label>
+                    <select id="boxType" required
+                        class="w-full bg-[#16132b] border border-gray-600 rounded-lg p-4 text-white focus:outline-none focus:border-yellow-500 transition-colors appearance-none">
+                        <option value="" disabled selected>請選擇</option>
+                        <option value="1">皮膚箱 1</option>
+                        <option value="2">皮膚箱 2</option>
+                        <option value="3">皮膚箱 3</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-4 rounded-lg text-xl shadow-lg transform active:scale-95 transition-all">
+                    立即參加抽獎
+                </button>
+            </form>
+        </div>
+
+        <script>
+            document.getElementById('lotteryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('robloxId').value;
+                const box = document.getElementById('boxType').value;
+                
+                alert(`參加成功！\nID: ${id}\n已選擇：皮膚箱 ${box}\n祝你中獎！`);
+            });
+        </script>
+    </div>
+
+</body>
+</html>
