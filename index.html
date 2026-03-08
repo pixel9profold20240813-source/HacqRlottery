@@ -2,55 +2,201 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>主持控制面板</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacqr RIVALS 抽獎系統</title>
     <style>
-        body { background-color: #12121e; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
-        .container { background-color: #1e1e2f; padding: 30px; border-radius: 12px; width: 500px; }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: none; box-sizing: border-box; }
-        button { cursor: pointer; font-weight: bold; }
-        .btn-orange { background-color: #ff9800; color: white; }
-        .btn-red { background-color: #d32f2f; color: white; }
-        #adminPanel { display: none; } /* 預設隱藏 */
-        .record-item { background: #2b2b42; padding: 10px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; }
+        :root {
+            --bg-color: #12121e;
+            --card-bg: #1e1e2f;
+            --input-bg: #2b2b42;
+            --primary-orange: #ff9800;
+            --danger-red: #d32f2f;
+            --text-main: #ffffff;
+            --text-sub: #b0b0c3;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        /* 標題與文字 */
+        h1 { font-size: 26px; color: #ffab40; text-align: center; margin-top: 0; }
+        .subtitle { text-align: center; margin-bottom: 25px; color: var(--text-sub); font-size: 14px; }
+        label { display: block; margin: 15px 0 8px; font-size: 14px; color: var(--text-sub); }
+
+        /* 輸入框與選單 */
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid #3d3d5c;
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input:focus { border-color: var(--primary-orange); }
+
+        /* 按鈕樣式 */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-orange { background-color: var(--primary-orange); }
+        .btn-orange:hover { background-color: #e68900; }
+        .btn-red { background-color: var(--danger-red); margin-top: 10px; }
+        .btn-red:hover { background-color: #b71c1c; }
+
+        /* 管理面板特有樣式 */
+        #admin-view { display: none; }
+        .stats { font-size: 14px; margin-bottom: 15px; }
+        .record-list {
+            margin-top: 25px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-top: 1px solid #3d3d5c;
+            padding-top: 10px;
+        }
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 5px;
+            border-bottom: 1px solid #2b2b42;
+            font-size: 14px;
+        }
+        .delete-icon {
+            background-color: var(--danger-red);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* 隱藏的管理切換按鈕 */
+        .admin-switch {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            color: #333;
+            cursor: pointer;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="loginArea">
-        <h2>請輸入管理密碼</h2>
-        <input type="password" id="password" placeholder="輸入密碼">
-        <button class="btn-orange" onclick="checkPassword()">登入</button>
-    </div>
-
-    <div id="adminPanel">
-        <h2>主持控制面板</h2>
-        <p>目前參加人數：9 人</p>
-        <input type="text" placeholder="搜尋 Roblox ID (支援部分匹配)">
-        <label>要抽出幾位贏家？</label>
-        <input type="number" value="6">
-        <button class="btn-orange">開始抽獎！</button>
-        <button class="btn-red">全部清空參加記錄（小心！不可復原）</button>
+    <div class="container" id="player-view">
+        <h1>Hacqr RIVALS 皮膚箱抽獎</h1>
+        <p class="subtitle">7萬訂閱特別篇 - 送30個皮膚箱！</p>
         
-        <div id="recordList">
-            <div class="record-item">Channing051 → Skin Case 3 <span>❌</span></div>
-            <div class="record-item">fgfgfg987654321 → Skin Case 2 <span>❌</span></div>
-            <div class="record-item">scw211116 → Skin Case 2 <span>❌</span></div>
-        </div>
+        <form id="lotteryForm">
+            <label>你的 Roblox ID / Username</label>
+            <input type="text" id="p-username" placeholder="例如：hAcKe_520" required>
+
+            <label>你要抽哪個皮膚箱？</label>
+            <select id="p-box" required>
+                <option value="">請選擇</option>
+                <option value="Skin Case 1">基礎皮膚箱 1</option>
+                <option value="Skin Case 2">高級皮膚箱 2</option>
+                <option value="Skin Case 3">傳奇皮膚箱 3</option>
+            </select>
+
+            <label>會員專屬代碼（會員可刷最多20次）</label>
+            <input type="text" id="p-code" placeholder="輸入你的專屬代碼（會員限定）">
+
+            <button type="submit" class="btn btn-orange">參加抽獎！</button>
+        </form>
     </div>
-</div>
 
-<script>
-    function checkPassword() {
-        const pass = document.getElementById('password').value;
-        if (pass === "1234") {
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-        } else {
-            alert("密碼錯誤！");
+    <div class="container" id="admin-view">
+        <h1>主持控制面板</h1>
+        <p class="stats">目前參加人數：<span id="count">9</span> 人</p>
+        
+        <input type="text" placeholder="搜尋 Roblox ID ( 支援部分匹配 )">
+        
+        <label>要抽出幾位贏家？</label>
+        <input type="number" id="winner-count" value="6">
+
+        <button class="btn btn-orange" onclick="alert('開始抽獎程序...')">開始抽獎！</button>
+        <button class="btn btn-red" onclick="confirmClear()">全部清空參加記錄 ( 小心！不可復原 )</button>
+
+        <div class="record-list" id="recordList">
+            <div class="record-item"><span>Channing051 → Skin Case 3</span> <span class="delete-icon">✕</span></div>
+            <div class="record-item"><span>fgfgfg987654321 → Skin Case 2</span> <span class="delete-icon">✕</span></div>
+            <div class="record-item"><span>scw211116 → Skin Case 2</span> <span class="delete-icon">✕</span></div>
+            </div>
+        
+        <button class="btn" style="background:#444;" onclick="switchView('player')">返回抽獎頁面</button>
+    </div>
+
+    <div class="admin-switch" onclick="promptAdmin()">Admin</div>
+
+    <script>
+        // 介面切換邏輯
+        function switchView(view) {
+            if (view === 'admin') {
+                document.getElementById('player-view').style.display = 'none';
+                document.getElementById('admin-view').style.display = 'block';
+            } else {
+                document.getElementById('player-view').style.display = 'block';
+                document.getElementById('admin-view').style.display = 'none';
+            }
         }
-    }
-</script>
 
+        // 密碼驗證
+        function promptAdmin() {
+            const pw = prompt("請輸入管理密碼：");
+            if (pw === "1234") {
+                switchView('admin');
+            } else if (pw !== null) {
+                alert("密碼錯誤");
+            }
+        }
+
+        // 玩家提交表單
+        document.getElementById('lotteryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('p-username').value;
+            alert(name + "，您的抽獎申請已送出！");
+        });
+
+        // 管理功能：清空記錄
+        function confirmClear() {
+            if (confirm("確定要刪除所有參加記錄嗎？此動作無法復原。")) {
+                document.getElementById('recordList').innerHTML = "";
+                document.getElementById('count').innerText = "0";
+            }
+        }
+    </script>
 </body>
 </html>
