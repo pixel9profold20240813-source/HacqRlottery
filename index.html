@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacqr RIVALS 皮膚箱抽獎</title>
+    <title>Hacqr RIVALS 抽獎系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f0c1d; color: white; }
@@ -14,8 +14,7 @@
 
     <div class="max-w-lg mx-auto mt-10">
         <h1 class="text-3xl font-bold text-yellow-400 text-center mb-2">Hacqr RIVALS 皮膚箱抽獎</h1>
-        <p class="text-yellow-500 text-center mb-6">7萬訂閱特別篇 - 送30個皮膚箱！</p>
-
+        
         <div class="bg-custom p-6 rounded-2xl mb-8">
             <label class="block mb-2">你的 Roblox ID / Username</label>
             <input type="text" id="robloxId" class="w-full bg-[#16132b] p-3 rounded mb-4 border border-gray-600" placeholder="例如：hAcKe_520">
@@ -31,16 +30,24 @@
         </div>
 
         <div class="border-t border-gray-700 pt-6">
-            <button onclick="document.getElementById('adminArea').classList.toggle('hidden')" class="text-gray-400 underline mb-4">主持人登入</button>
+            <button onclick="document.getElementById('adminArea').classList.toggle('hidden')" class="text-gray-400 underline mb-4">主持人控制面板</button>
             
-            <div id="adminArea" class="hidden bg-black/30 p-4 rounded-xl">
-                <input type="password" id="adminPass" placeholder="輸入密碼" class="w-full p-2 mb-2 bg-[#16132b] rounded">
+            <div id="adminArea" class="hidden bg-black/30 p-6 rounded-xl">
+                <input type="password" id="adminPass" placeholder="輸入密碼以解鎖" class="w-full p-2 mb-2 bg-[#16132b] rounded">
                 <button onclick="checkAdmin()" class="bg-red-600 w-full py-2 rounded mb-4">登入管理</button>
                 
                 <div id="adminPanel" class="hidden">
-                    <h2 class="text-xl mb-2">主持控制面板</h2>
-                    <p id="count" class="mb-4"></p>
+                    <p id="count" class="text-xl font-bold mb-4"></p>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm mb-2">要抽出幾位贏家？</label>
+                        <input type="number" id="winnerCount" value="1" class="w-full p-2 bg-[#16132b] rounded mb-2">
+                        <button onclick="drawWinners()" class="w-full bg-orange-500 text-black font-bold py-3 rounded-lg mb-4">開始抽獎！</button>
+                    </div>
+
                     <button onclick="clearAll()" class="bg-red-700 w-full py-2 rounded mb-4">全部清空參加記錄</button>
+                    
+                    <div id="winnerList" class="mb-6 text-green-400"></div>
                     <div id="participantList" class="space-y-2"></div>
                 </div>
             </div>
@@ -67,12 +74,26 @@
             } else { alert("密碼錯誤"); }
         }
 
+        function drawWinners() {
+            let data = getData();
+            let count = parseInt(document.getElementById('winnerCount').value);
+            if(data.length === 0) return alert("沒有參加者");
+            if(count > data.length) count = data.length;
+
+            let shuffled = [...data].sort(() => 0.5 - Math.random());
+            let winners = shuffled.slice(0, count);
+            
+            let listHtml = `<h3 class="font-bold border-b border-green-800 pb-2 mb-2">中獎名單：</h3>`;
+            winners.forEach(w => listHtml += `<div class="py-1">${w.id} → ${w.box}</div>`);
+            document.getElementById('winnerList').innerHTML = listHtml;
+        }
+
         function renderList() {
             const data = getData();
-            document.getElementById('count').innerText = "目前參加人數：" + data.length;
+            document.getElementById('count').innerText = "目前參加人數：" + data.length + " 人";
             const list = document.getElementById('participantList');
             list.innerHTML = data.map((p, i) => `
-                <div class="bg-[#1e1b33] p-3 flex justify-between rounded">
+                <div class="bg-[#1e1b33] p-3 flex justify-between rounded text-sm">
                     ${p.id} → ${p.box}
                     <button onclick="remove(${i})" class="text-red-500">✕</button>
                 </div>
@@ -89,6 +110,7 @@
         function clearAll() {
             if(confirm("確定清空所有資料？")) {
                 localStorage.removeItem('lottery_users');
+                document.getElementById('winnerList').innerHTML = "";
                 renderList();
             }
         }
