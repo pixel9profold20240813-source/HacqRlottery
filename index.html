@@ -2,69 +2,74 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacqr RIVALS 皮膚箱抽獎</title>
+    <title>Hacqr RIVALS 抽獎系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #0f0c1d; /* 深紫色背景 */
-        }
-        .glow-text {
-            text-shadow: 0 0 10px rgba(255, 193, 7, 0.8), 0 0 20px rgba(255, 193, 7, 0.5);
-        }
-        .form-container {
-            background-color: #1e1b33;
-            border: 1px solid #3d3a54;
-        }
-    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="bg-[#0f0c1d] text-white p-6">
 
-    <div class="w-full max-w-lg text-center">
-        <h1 class="text-4xl md:text-5xl font-bold text-yellow-400 glow-text mb-2">
-            Hacqr RIVALS 皮膚箱抽獎
-        </h1>
-        <p class="text-yellow-500 text-lg mb-8">
-            7萬訂閱特別篇 - 送30個皮膚箱！
-        </p>
-
-        <div class="form-container p-8 rounded-2xl shadow-2xl text-left">
-            <form id="lotteryForm">
-                <div class="mb-6">
-                    <label class="block text-gray-300 text-lg mb-2">你的 Roblox ID / Username</label>
-                    <input type="text" id="robloxId" required
-                        class="w-full bg-[#16132b] border border-gray-600 rounded-lg p-4 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-colors"
-                        placeholder="例如：hAcKe_520">
-                </div>
-
-                <div class="mb-8">
-                    <label class="block text-gray-300 text-lg mb-2">你要抽哪個皮膚箱？</label>
-                    <select id="boxType" required
-                        class="w-full bg-[#16132b] border border-gray-600 rounded-lg p-4 text-white focus:outline-none focus:border-yellow-500 transition-colors appearance-none">
-                        <option value="" disabled selected>請選擇</option>
-                        <option value="1">皮膚箱 1</option>
-                        <option value="2">皮膚箱 2</option>
-                        <option value="3">皮膚箱 3</option>
-                    </select>
-                </div>
-
-                <button type="submit"
-                    class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-4 rounded-lg text-xl shadow-lg transform active:scale-95 transition-all">
-                    立即參加抽獎
-                </button>
-            </form>
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold text-yellow-400 mb-6 text-center">Hacqr RIVALS 抽獎系統</h1>
+        
+        <div class="bg-[#1e1b33] p-6 rounded-xl mb-8">
+            <input type="text" id="username" placeholder="輸入 Roblox ID" class="w-full p-2 mb-2 bg-[#16132b] rounded">
+            <select id="box" class="w-full p-2 mb-4 bg-[#16132b] rounded">
+                <option value="1">皮膚箱 1</option>
+                <option value="2">皮膚箱 2</option>
+                <option value="3">皮膚箱 3</option>
+            </select>
+            <button onclick="joinLottery()" class="w-full bg-yellow-500 py-2 rounded text-black font-bold">參加抽獎</button>
         </div>
 
-        <script>
-            document.getElementById('lotteryForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const id = document.getElementById('robloxId').value;
-                const box = document.getElementById('boxType').value;
+        <div class="border-t border-gray-700 pt-6">
+            <button onclick="showAdmin()" class="bg-gray-600 px-4 py-2 rounded">主持人專用</button>
+            
+            <div id="adminPanel" class="hidden mt-4 bg-red-900/20 p-4 rounded">
+                <input type="password" id="adminPass" placeholder="輸入密碼" class="p-2 w-full mb-2 bg-black rounded">
+                <button onclick="verifyAdmin()" class="bg-red-600 px-4 py-2 rounded">登入管理</button>
                 
-                alert(`參加成功！\nID: ${id}\n已選擇：皮膚箱 ${box}\n祝你中獎！`);
-            });
-        </script>
+                <div id="dataView" class="hidden mt-4">
+                    <button onclick="clearData()" class="bg-red-500 text-sm px-2 py-1 mb-2">清除所有資料</button>
+                    <ul id="list" class="text-sm bg-black p-2 rounded"></ul>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script>
+        // 參加抽獎
+        function joinLottery() {
+            const user = document.getElementById('username').value;
+            const box = document.getElementById('box').value;
+            if(!user) return alert("請輸入ID");
+            
+            let data = JSON.parse(localStorage.getItem('participants') || '[]');
+            data.push({user, box});
+            localStorage.setItem('participants', JSON.stringify(data));
+            alert("參加成功！");
+        }
+
+        // 主持人功能
+        function showAdmin() { document.getElementById('adminPanel').classList.remove('hidden'); }
+        
+        function verifyAdmin() {
+            if(document.getElementById('adminPass').value === 'hacqrfansvip666') {
+                document.getElementById('dataView').classList.remove('hidden');
+                updateList();
+            } else { alert("密碼錯誤"); }
+        }
+
+        function updateList() {
+            const data = JSON.parse(localStorage.getItem('participants') || '[]');
+            const list = document.getElementById('list');
+            list.innerHTML = data.map(i => `<li>ID: ${i.user} | 箱子: ${i.box}</li>`).join('');
+        }
+
+        function clearData() {
+            if(confirm("確定清除？")) {
+                localStorage.removeItem('participants');
+                updateList();
+            }
+        }
+    </script>
 </body>
 </html>
