@@ -2,83 +2,55 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacqr RIVALS 皮膚箱抽獎</title>
+    <title>主持控制面板</title>
     <style>
-        body {
-            background-color: #12121e;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #1e1e2f;
-            padding: 40px;
-            border-radius: 12px;
-            width: 450px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        h1 { font-size: 24px; color: #ffab40; text-align: center; }
-        .subtitle { text-align: center; margin-bottom: 20px; color: #b0b0c3; }
-        label { display: block; margin: 15px 0 5px; font-size: 14px; }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            background-color: #2b2b42;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 25px;
-            background-color: #ff9800;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover { background-color: #e68900; }
+        body { background-color: #12121e; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
+        .container { background-color: #1e1e2f; padding: 30px; border-radius: 12px; width: 500px; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: none; box-sizing: border-box; }
+        button { cursor: pointer; font-weight: bold; }
+        .btn-orange { background-color: #ff9800; color: white; }
+        .btn-red { background-color: #d32f2f; color: white; }
+        #adminPanel { display: none; } /* 預設隱藏 */
+        .record-item { background: #2b2b42; padding: 10px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Hacqr RIVALS 皮膚箱抽獎</h1>
-        <p class="subtitle">7萬訂閱特別篇 - 送30個皮膚箱！</p>
-        
-        <form id="lotteryForm">
-            <label for="username">你的 Roblox ID / Username</label>
-            <input type="text" id="username" placeholder="例如：hAcKe_520" required>
-
-            <label for="boxSelect">你要抽哪個皮膚箱？</label>
-            <select id="boxSelect" required>
-                <option value="">請選擇</option>
-                <option value="box1">新手基礎箱</option>
-                <option value="box2">傳奇限定箱</option>
-            </select>
-
-            <label for="code">會員專屬代碼（會員可刷最多20次，非會員限1次）</label>
-            <input type="text" id="code" placeholder="輸入你的專屬代碼（會員限定）">
-
-            <button type="submit">參加抽獎！</button>
-        </form>
+<div class="container">
+    <div id="loginArea">
+        <h2>請輸入管理密碼</h2>
+        <input type="password" id="password" placeholder="輸入密碼">
+        <button class="btn-orange" onclick="checkPassword()">登入</button>
     </div>
 
-    <script>
-        document.getElementById('lotteryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert("抽獎請求已送出！");
-        });
-    </script>
+    <div id="adminPanel">
+        <h2>主持控制面板</h2>
+        <p>目前參加人數：9 人</p>
+        <input type="text" placeholder="搜尋 Roblox ID (支援部分匹配)">
+        <label>要抽出幾位贏家？</label>
+        <input type="number" value="6">
+        <button class="btn-orange">開始抽獎！</button>
+        <button class="btn-red">全部清空參加記錄（小心！不可復原）</button>
+        
+        <div id="recordList">
+            <div class="record-item">Channing051 → Skin Case 3 <span>❌</span></div>
+            <div class="record-item">fgfgfg987654321 → Skin Case 2 <span>❌</span></div>
+            <div class="record-item">scw211116 → Skin Case 2 <span>❌</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function checkPassword() {
+        const pass = document.getElementById('password').value;
+        if (pass === "1234") {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        } else {
+            alert("密碼錯誤！");
+        }
+    }
+</script>
+
 </body>
 </html>
